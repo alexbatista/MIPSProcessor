@@ -1,16 +1,17 @@
 // Quartus Prime Verilog Template
 // Single port RAM with single read/write address 
 
-module single_port_ram 
+module single_port_ram
+#(parameter WIDTH=32) 
 (
-	input [7:0] data,
-	input [4:0] addr,
+	input [WIDTH-1:0] addr,
+	input [WIDTH-1:0] data,
 	input we, clk,
-	output [7:0] q
+	output [WIDTH-1:0] q
 );
 
 	// Declare the RAM variable
-	reg [7:0] ram[31:0];
+	reg [31:0] ram[31:0];
 
 	// Variable to hold the registered read address
 	reg [4:0] addr_reg;

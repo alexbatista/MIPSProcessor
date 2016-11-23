@@ -1,6 +1,6 @@
 module fullAdder
 #(parameter WIDTH=8)
-(input [WIDTH-1:0]  in1, in2,output logic ovf, output logic [WIDTH-1:0] out);
+(input logic [WIDTH-1:0]  in1, in2,output logic ovf, output logic [WIDTH-1:0] out);
 
 	logic a, b;
 	

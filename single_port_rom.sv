@@ -3,13 +3,13 @@
 
 module single_port_rom
 (
-	input [4:0] addr,
+	input [31:0] addr,
 	input clk, 
-	output reg [23:0] q
+	output reg [31:0] q
 );
 
 	// Declare the ROM variable
-	reg [23:0] rom[31:0];
+	reg [31:0] rom[31:0];
 
 	// Initialize the ROM with $readmemb.  Put the memory contents
 	// in the file single_port_rom_init.txt.  Without this file,
