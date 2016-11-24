@@ -4,10 +4,14 @@ module registerFile
 
 	reg[WIDTH-1:0] ram [WIDTH-1:0];
 	
-	always @(posedge clk)
+	always @(*)
 	begin
 		RD1 <= ram[A1];
 		RD2 <= ram[A2];
+	end
+	
+	always(posedge clk)
+	begin
 		if(we3)
 		begin
 			ram[A3] <= WD3;

@@ -13,21 +13,20 @@ module single_port_ram
 	// Declare the RAM variable
 	reg [31:0] ram[31:0];
 
-	// Variable to hold the registered read address
-	reg [4:0] addr_reg;
 
 	always @ (posedge clk)
 	begin
 		// Write
 		if (we)
+		begin
 			ram[addr] <= data;
-
-		addr_reg <= addr;
+		end
+	
 	end
 
 	// Continuous assignment implies read returns NEW data.
 	// This is the natural behavior of the TriMatrix memory
 	// blocks in Single Port mode.  
-	assign q = ram[addr_reg];
+	assign q = ram[addr];
 
 endmodule

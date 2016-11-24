@@ -1,17 +1,19 @@
 module mainProcessor(input clk,reset);
 
-logic [31:0] pc_in, pc_out, pc_mux_out, inst_mem_out, se_im_out, rf_out1,rf_out2, alu_out, dm_out, mux_alu_out,mux_data_memory_out,shift_out, sum_Pcbranch_out;
+logic [31:0]  pc_out, pc_mux_out, pc_mux2_out, PCPlus4_out, inst_mem_out, se_im_out, rf_out1,rf_out2, alu_out, dm_out, mux_alu_out,mux_data_memory_out,shift_out, sum_Pcbranch_out;
 logic [4:0] writeReg_out;
 logic [2:0] control;
 logic en, ovf,ovf2, zero, WE3,we;
 
 //SINAIS DE CONTROLE AINDA NAO ESTAO CONFIGURADOS PARA NENHUMA ENTRADA DOS BLOCOS
 
-mux2_1 PCMux(control,pc_in,sum_Pcbranch_out,pc_mux_out);
+mux2_1 PCMux(control,PCPlus4_out,sum_Pcbranch_out,pc_mux_out);
 
-register PC(pc_mux_out,clk,reset,en,pc_out);
+mux2_1 PCMux2(control, pc_mux_out,{PCPlus4_out[31:28],inst_mem_out[25:0],0,0}, pc_mux2_out);
 
-fullAdder PCPlus4(pc_out,32'd4,ovf,pc_in);
+register PC(pc_mux2_out,clk,reset,en,pc_out);
+
+fullAdder PCPlus4(pc_out,32'd4,ovf,PCPlus4_out);
 
 single_port_rom Instruction_Memory(pc_out,clk,inst_mem_out);
 
@@ -25,12 +27,12 @@ mux2_1 Mux_Alu(control,rf_out2,se_im_out, mux_alu_out);
 
 alu ALU(rf_out1,mux_alu_out,control,alu_out,zero); //1. falta and com a saida zero da ALU e sinal Branch - 2. DUVIDA SOBRE O QUE POR NA SAIDA ZERO
 
-single_port_ram Data_Memory(alu_out,rf_out2, we, clk,dm_out); //Verificar codigo interno. Are you sure? Yes or No
+single_port_ram Data_Memory(alu_out,rf_out2, we, clk,dm_out);
 
 mux2_1 Mux_Data_Memory(control,alu_out,dm_out,mux_data_memory_out);
 
 shiftLeft Shift(se_im_out,shift_out);
 
-fullAdder PCBranch(shift_out,pc_in,ovf2,sum_Pcbranch_out);
+fullAdder PCBranch(shift_out,PCPlus4_out,ovf2,sum_Pcbranch_out);
 
 endmodule
