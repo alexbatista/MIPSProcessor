@@ -10,7 +10,7 @@ module registerFile
 		RD2 <= ram[A2];
 	end
 	
-	always(posedge clk)
+	always @(posedge clk)
 	begin
 		if(we3)
 		begin
