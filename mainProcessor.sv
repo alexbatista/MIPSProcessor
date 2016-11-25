@@ -1,38 +1,40 @@
-module mainProcessor(input clk,reset);
+module mainProcessor(input clk,reset, output logic [31:0] result);
 
-logic [31:0]  pc_out, pc_mux_out, pc_mux2_out, PCPlus4_out, inst_mem_out, se_im_out, rf_out1,rf_out2, alu_out, dm_out, mux_alu_out,mux_data_memory_out,shift_out, sum_Pcbranch_out;
-logic [4:0] writeReg_out;
-logic [2:0] control;
-logic en, ovf,ovf2, zero, WE3,we;
+logic PCSrc, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Zero, Jump;
+logic [2:0] ALUControl;
+logic [4:0] WriteReg;
+logic [31:0] PCPlus4, PCBranch, PC_in, PC_out, Instr, SignImm, SrcA, SrcB, ALUResult, WriteData, ShiftLeft_out, ReadData,
+				 Result, Mux_PCSrc_out, ShiftLeftJump_out;
 
-//SINAIS DE CONTROLE AINDA NAO ESTAO CONFIGURADOS PARA NENHUMA ENTRADA DOS BLOCOS
+assign result = Result;				 
+				 
+mux2_1 Mux_PCSrc(.sel(PCSrc), .a(PCPlus4), .b(PCBranch), .y(Mux_PCSrc_out));
 
-mux2_1 PCMux(control,PCPlus4_out,sum_Pcbranch_out,pc_mux_out);
+mux2_1 Mux_Jump(.sel(Jump), .a(Mux_PCSrc_out), .b({PCPlus4[31:28], ShiftLeftJump_out[27:0]}), .y(PC_in));
 
-mux2_1 PCMux2(control, pc_mux_out,{PCPlus4_out[31:28],inst_mem_out[25:0],0,0}, pc_mux2_out);
+register PC(.d(PC_in), .clk(clk), .reset(reset), .en(1'b1), .q(PC_out));
+imem InstructionMemory(.a(PC_out[7:2]), .rd(Instr));
+assign PCPlus4 = PC_out + 32'd4;
 
-register PC(pc_mux2_out,clk,reset,en,pc_out);
 
-fullAdder PCPlus4(pc_out,32'd4,ovf,PCPlus4_out);
+controlUnit ControlUnit(.funct(Instr[5:0]), .op(Instr[31:26]), .memtoreg(MemtoReg), 
+								.memwrite(MemWrite), .branch(Branch), .alusrc(ALUSrc), .regdst(RegDst), 
+								.regwrite(RegWrite), .alucontrol(ALUControl), .jump(Jump));
+registerFile RegisterFile(.A1(Instr[25:21]), .A2(Instr[20:16]), .A3(WriteReg), .WD3(Result), .clk(clk),
+								  .we3(RegWrite), .RD1(SrcA), .RD2(WriteData));
+mux2_1 #(5) Mux_RegDst(.sel(RegDst), .a(Instr[20:16]),.b(Instr[15:11]), .y(WriteReg));
+signExtend SignExtend(.a(Instr[15:0]), .y(SignImm));
+shiftLeft ShiftLeftJump(.in({6'b0,Instr[25:0]}), .out(ShiftLeftJump_out));
 
-single_port_rom Instruction_Memory(pc_out,clk,inst_mem_out);
 
-registerFile Register_File(inst_mem_out[25:21],inst_mem_out[20:16],writeReg_out,mux_data_memory_out, clk,WE3, rf_out1,rf_out2); 
+assign PCSrc = Branch & Zero;
+alu ALU(.a(SrcA), .b(SrcB), .sel(ALUControl), .result(ALUResult), .zero(Zero));
+mux2_1 Mux_ALUSrc(.sel(ALUSrc), .a(WriteData), .b(SignImm), .y(SrcB));
+shiftLeft ShiftLeft(.in(SignImm), .out(ShiftLeft_out));
+assign PCBranch = ShiftLeft_out + PCPlus4;
 
-mux2_1 #(5) WriteReg (control,inst_mem_out[20:16],inst_mem_out[15:11],writeReg_out);
 
-signExtend IM_out(inst_mem_out[15:0],se_im_out);
+dmem DataMemory(.a(ALUResult), .wd(WriteData), .we(MemWrite), .clk(clk), .rd(ReadData));
+mux2_1 Mux_MemtoReg(.sel(MemtoReg), .a(ALUResult), .b(ReadData), .y(Result));
 
-mux2_1 Mux_Alu(control,rf_out2,se_im_out, mux_alu_out);
-
-alu ALU(rf_out1,mux_alu_out,control,alu_out,zero); //1. falta and com a saida zero da ALU e sinal Branch - 2. DUVIDA SOBRE O QUE POR NA SAIDA ZERO
-
-single_port_ram Data_Memory(alu_out,rf_out2, we, clk,dm_out);
-
-mux2_1 Mux_Data_Memory(control,alu_out,dm_out,mux_data_memory_out);
-
-shiftLeft Shift(se_im_out,shift_out);
-
-fullAdder PCBranch(shift_out,PCPlus4_out,ovf2,sum_Pcbranch_out);
-
-endmodule
+endmodule 

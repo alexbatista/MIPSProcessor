@@ -21,7 +21,7 @@ module single_port_rom
 
 	initial
 	begin
-		$readmemb("single_port_rom_init.txt", rom);
+		$readmemh("single_port_rom_init.txt", rom);
 	end
 
 	always @ (*)
@@ -29,4 +29,4 @@ module single_port_rom
 		q <= rom[addr];
 	end
 
-endmodule
+endmodule 

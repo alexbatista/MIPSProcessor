@@ -6,8 +6,14 @@ module registerFile
 	
 	always @(*)
 	begin
-		RD1 <= ram[A1];
-		RD2 <= ram[A2];
+		if(A1 == 5'd0)
+			RD1 <= 32'd0;
+		else
+			RD1 <= ram[A1];
+		if(A2 == 5'd0)
+			RD2 <= 32'd0;
+		else
+			RD2 <= ram[A2];
 	end
 	
 	always @(posedge clk)
