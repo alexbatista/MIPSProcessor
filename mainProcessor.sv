@@ -1,4 +1,4 @@
-module mainProcessor(input clk,reset, output logic [31:0] result);
+module mainProcessor(input clk,reset, output logic memwrite, output logic [31:0] pc, instr, aluout, writedata, readdata);
 
 logic PCSrc, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Zero, Jump, Mux_Branch_out;
 logic [2:0] ALUControl;
@@ -6,7 +6,12 @@ logic [4:0] WriteReg;
 logic [31:0] PCPlus4, PCBranch, PC_in, PC_out, Instr, SignImm, SrcA, SrcB, ALUResult, WriteData, ShiftLeft_out, ReadData,
 				 Result, Mux_PCSrc_out, ShiftLeftJump_out;
 
-assign result = Result;				 
+assign memwrite = MemWrite;
+assign pc = PC_out;
+assign instr = Instr;
+assign aluout = ALUResult;
+assign writedata = WriteData;
+assign readdata = ReadData;
 				 
 mux2_1 Mux_PCSrc(.sel(PCSrc), .a(PCPlus4), .b(PCBranch), .y(Mux_PCSrc_out));
 
