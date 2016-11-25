@@ -7,7 +7,7 @@ module aluDecoder (input logic [5:0] funct,
 			casez(aluop)
 				2'b00: alucontrol = 3'b010;
 				2'b01: alucontrol = 3'b110;
-				2'b1?: 
+				2'b10: 
 						 begin
 							case(funct)
 								6'b100000: alucontrol = 3'b010;
@@ -18,6 +18,7 @@ module aluDecoder (input logic [5:0] funct,
 								default: alucontrol = 3'b000;
 							endcase
 						 end
+				2'b11: alucontrol = 3'b001;
 				default: alucontrol = 3'b000;
 			endcase
 		end

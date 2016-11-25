@@ -1,6 +1,6 @@
 module mainProcessor(input clk,reset, output logic [31:0] result);
 
-logic PCSrc, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Zero, Jump;
+logic PCSrc, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Zero, Jump, Mux_Branch_out;
 logic [2:0] ALUControl;
 logic [4:0] WriteReg;
 logic [31:0] PCPlus4, PCBranch, PC_in, PC_out, Instr, SignImm, SrcA, SrcB, ALUResult, WriteData, ShiftLeft_out, ReadData,
@@ -27,7 +27,8 @@ signExtend SignExtend(.a(Instr[15:0]), .y(SignImm));
 shiftLeft ShiftLeftJump(.in({6'b0,Instr[25:0]}), .out(ShiftLeftJump_out));
 
 
-assign PCSrc = Branch & Zero;
+mux2_1 #(1) Mux_Branch(.sel(Instr[26]), .a(Zero), .b(~Zero), .y(Mux_Branch_out));
+assign PCSrc = Branch & Mux_Branch_out;
 alu ALU(.a(SrcA), .b(SrcB), .sel(ALUControl), .result(ALUResult), .zero(Zero));
 mux2_1 Mux_ALUSrc(.sel(ALUSrc), .a(WriteData), .b(SignImm), .y(SrcB));
 shiftLeft ShiftLeft(.in(SignImm), .out(ShiftLeft_out));

@@ -10,7 +10,7 @@ module mainDecoder(input logic [5:0] opcode,
 
 	always @(*)
 		begin
-			case(opcode)
+			casez(opcode)
 				6'b000000:	// R-type
 					begin
 						regwrite = 1;
@@ -44,7 +44,7 @@ module mainDecoder(input logic [5:0] opcode,
 						aluop = 2'b00;
 						jump = 0;
 					end
-				6'b000100:	// beq
+				6'b00010?:	// beq
 					begin
 						regwrite = 0;
 						regdst = 0;
@@ -76,6 +76,17 @@ module mainDecoder(input logic [5:0] opcode,
 						memtoreg = 0;
 						aluop = 2'b00;
 						jump = 1;
+					end
+				6'b001101:	// ori
+					begin
+						regwrite = 1;
+						regdst = 0;
+						alusrc = 1;
+						branch = 0;
+						memwrite = 0;
+						memtoreg = 0;
+						aluop = 2'b11;
+						jump = 0;
 					end
 				default:
 					begin

@@ -5,7 +5,7 @@ module imem (input [5:0] a,
 	
 	initial
 		begin
-			$readmemh ("memfile.dat",ROM);
+			$readmemh ("single_port_rom_init.txt",ROM); // files single_port_rom_init.txt memfile.dat
 		end
 		
 	assign rd = ROM[a]; // word aligned
